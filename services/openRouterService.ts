@@ -28,8 +28,72 @@ export const fetchModels = async (): Promise<OpenRouterModel[]> => {
   }
 };
 
+export const analyzeSingleBond = async (
+  bond: Bond,
+  apiKey: string,
+  modelId: string
+): Promise<string> => {
+  if (!apiKey) return "API Key missing.";
+
+  const prompt = `
+    Ты профессиональный финансовый аналитик, специализирующийся на рынке облигаций РФ (Мосбиржа).
+    Отвечай строго на русском языке.
+    
+    Проанализируй данную облигацию и дай рекомендацию: СТОИТ ЛИ ЕЕ ПОКУПАТЬ СЕЙЧАС?
+
+    Данные облигации:
+    - Тикер: ${bond.secid}
+    - Название: ${bond.shortname}
+    - Цена: ${bond.price}%
+    - Доходность: ${bond.yield}%
+    - Купон: ${bond.couponPercent}%
+    - Погашение: ${bond.maturityDate} (Дюрация: ${bond.duration} дн.)
+    - Объем торгов: ${bond.volume} RUB
+    - Оферта: ${bond.offerDate || 'Нет'}
+    - Флоатер: ${bond.isFloater ? 'Да' : 'Нет'}
+    - Амортизация: ${bond.isAmortized ? 'Да' : 'Нет'}
+    - Уровень листинга: ${bond.listLevel}
+
+    Твоя задача:
+    1. Дай четкий вердикт: "Покупать", "Держать", "Продавать" или "Рискованно".
+    2. Обоснуй решение, оценив соотношение риск/доходность.
+    3. Сравни доходность с текущей ключевой ставкой ЦБ РФ (предполагай ~21-23%).
+    4. Укажи главные плюсы и минусы инструмента.
+    5. Отформатируй ответ в Markdown.
+  `;
+
+  try {
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": window.location.origin,
+        "X-Title": "MOEX Bond Search",
+      },
+      body: JSON.stringify({
+        "model": modelId,
+        "messages": [
+          { "role": "user", "content": prompt }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.error?.message || "OpenRouter API Error");
+    }
+
+    const data = await response.json();
+    return data.choices[0]?.message?.content || "Не удалось получить ответ от модели.";
+  } catch (error: any) {
+    console.error("OpenRouter Error:", error);
+    return `Ошибка при обращении к AI: ${error.message}`;
+  }
+};
+
 export const analyzeBondsOpenRouter = async (
-  bonds: Bond[], 
+  bonds: Bond[],
   userQuery: string,
   apiKey: string,
   modelId: string

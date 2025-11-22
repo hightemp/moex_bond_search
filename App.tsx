@@ -5,6 +5,7 @@ import BondTable from './components/BondTable';
 import Filters from './components/Filters';
 import YieldChart from './components/YieldChart';
 import AIAdvisor from './components/AIAdvisor';
+import BondAnalysisModal from './components/BondAnalysisModal';
 import { TrendingUp, Activity, AlertCircle, RefreshCw, Star, LayoutDashboard } from 'lucide-react';
 
 // Helper for bond ratings
@@ -49,6 +50,9 @@ const App: React.FC = () => {
 
   // Navigation State
   const [currentView, setCurrentView] = useState<'market' | 'favorites'>('market');
+  
+  // Analysis Modal State
+  const [selectedBondForAnalysis, setSelectedBondForAnalysis] = useState<Bond | null>(null);
 
   useEffect(() => {
     localStorage.setItem('favorite_bonds_full', JSON.stringify(favorites));
@@ -281,16 +285,17 @@ const App: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <BondTable 
-                bonds={processedBonds} 
-                sortField={sortField} 
-                sortOrder={sortOrder} 
+              <BondTable
+                bonds={processedBonds}
+                sortField={sortField}
+                sortOrder={sortOrder}
                 onSort={handleSort}
                 favorites={favorites.map(f => f.secid)}
                 onToggleFavorite={(secid) => {
                   const bond = rawBonds.find(b => b.secid === secid);
                   if (bond) toggleFavorite(bond);
                 }}
+                onAnalyze={setSelectedBondForAnalysis}
               />
             )}
           </div>
@@ -356,21 +361,28 @@ const App: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <BondTable 
-                bonds={favorites} 
-                sortField={sortField} 
-                sortOrder={sortOrder} 
+              <BondTable
+                bonds={favorites}
+                sortField={sortField}
+                sortOrder={sortOrder}
                 onSort={handleSort}
                 favorites={favorites.map(f => f.secid)}
                 onToggleFavorite={(secid) => {
                   const bond = favorites.find(b => b.secid === secid);
                   if (bond) toggleFavorite(bond);
                 }}
+                onAnalyze={setSelectedBondForAnalysis}
               />
             )}
           </div>
         )}
       </main>
+
+      {/* Analysis Modal */}
+      <BondAnalysisModal
+        bond={selectedBondForAnalysis}
+        onClose={() => setSelectedBondForAnalysis(null)}
+      />
     </div>
   );
 };
