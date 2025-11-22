@@ -34,6 +34,7 @@ export interface FilterState {
   searchText: string;
   listLevel: 'all' | 1 | 2 | 3;
   showBestBuysOnly: boolean;
+  showFavoritesOnly: boolean;
 }
 
 // MOEX API Raw Response Types

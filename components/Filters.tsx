@@ -1,37 +1,63 @@
-import React from 'react';
 import { FilterState } from '../types';
-import { Search, SlidersHorizontal, ShieldCheck } from 'lucide-react';
+import { Search, SlidersHorizontal, ShieldCheck, Star, X } from 'lucide-react';
 
 interface FiltersProps {
   filters: FilterState;
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
+  onReset: () => void;
 }
 
-const Filters: React.FC<FiltersProps> = ({ filters, setFilters }) => {
+const Filters: React.FC<FiltersProps> = ({ filters, setFilters, onReset }) => {
   const handleChange = (key: keyof FilterState, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
   return (
     <div className="space-y-4 mb-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-slate-400 flex items-center gap-2">
-          <SlidersHorizontal className="w-4 h-4" />
-          Фильтры рынка
-        </h3>
-        <label className="flex items-center cursor-pointer group">
-          <input 
-            type="checkbox" 
-            checked={filters.showBestBuysOnly}
-            onChange={(e) => handleChange('showBestBuysOnly', e.target.checked)}
-            className="sr-only peer"
-          />
-          <div className="relative w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-          <span className="ms-3 text-sm font-medium text-slate-300 group-hover:text-emerald-400 transition-colors flex items-center gap-1">
-            <ShieldCheck className="w-4 h-4" />
-            Только лучшие
-          </span>
-        </label>
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center gap-4">
+          <h3 className="text-sm font-semibold text-slate-400 flex items-center gap-2">
+            <SlidersHorizontal className="w-4 h-4" />
+            Фильтры рынка
+          </h3>
+          <button
+            onClick={onReset}
+            className="text-xs text-slate-500 hover:text-white flex items-center gap-1 transition-colors"
+          >
+            <X className="w-3 h-3" />
+            Сбросить
+          </button>
+        </div>
+        
+        <div className="flex items-center gap-6">
+          <label className="flex items-center cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={filters.showFavoritesOnly}
+              onChange={(e) => handleChange('showFavoritesOnly', e.target.checked)}
+              className="sr-only peer"
+            />
+            <div className="relative w-9 h-5 bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-500 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+            <span className="ms-2 text-sm font-medium text-slate-300 group-hover:text-amber-400 transition-colors flex items-center gap-1">
+              <Star className="w-3 h-3" />
+              Избранное
+            </span>
+          </label>
+
+          <label className="flex items-center cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={filters.showBestBuysOnly}
+              onChange={(e) => handleChange('showBestBuysOnly', e.target.checked)}
+              className="sr-only peer"
+            />
+            <div className="relative w-9 h-5 bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+            <span className="ms-2 text-sm font-medium text-slate-300 group-hover:text-emerald-400 transition-colors flex items-center gap-1">
+              <ShieldCheck className="w-3 h-3" />
+              Только лучшие
+            </span>
+          </label>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">

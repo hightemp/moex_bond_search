@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Bond, SortField, SortOrder, FilterState } from './types';
 import { fetchBonds } from './services/moexService';
 import BondTable from './components/BondTable';
 import Filters from './components/Filters';
 import YieldChart from './components/YieldChart';
 import AIAdvisor from './components/AIAdvisor';
-import { TrendingUp, Activity, AlertCircle, RefreshCw } from 'lucide-react';
+import { TrendingUp, Activity, AlertCircle, RefreshCw, Star, LayoutDashboard } from 'lucide-react';
 
 // Helper for bond ratings
 export const getBondRating = (bond: Bond): string | null => {
@@ -33,12 +33,52 @@ const App: React.FC = () => {
   const [filters, setFilters] = useState<FilterState>({
     minYield: 10,
     maxPrice: 105,
-    minVolume: 0, 
-    maxDurationDays: 2000, 
+    minVolume: 0,
+    maxDurationDays: 2000,
     searchText: '',
     listLevel: 'all',
-    showBestBuysOnly: false
+    showBestBuysOnly: false,
+    showFavoritesOnly: false
   });
+
+  // Favorites State (Full Bond Objects)
+  const [favorites, setFavorites] = useState<Bond[]>(() => {
+    const saved = localStorage.getItem('favorite_bonds_full');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // Navigation State
+  const [currentView, setCurrentView] = useState<'market' | 'favorites'>('market');
+
+  useEffect(() => {
+    localStorage.setItem('favorite_bonds_full', JSON.stringify(favorites));
+  }, [favorites]);
+
+  const toggleFavorite = (bond: Bond) => {
+    setFavorites(prev => {
+      const exists = prev.some(b => b.secid === bond.secid);
+      if (exists) {
+        return prev.filter(b => b.secid !== bond.secid);
+      } else {
+        return [...prev, bond];
+      }
+    });
+  };
+
+  const isFavorite = (secid: string) => favorites.some(b => b.secid === secid);
+
+  const resetFilters = () => {
+    setFilters({
+      minYield: 10,
+      maxPrice: 105,
+      minVolume: 0,
+      maxDurationDays: 2000,
+      searchText: '',
+      listLevel: 'all',
+      showBestBuysOnly: false,
+      showFavoritesOnly: false
+    });
+  };
 
   // Sort State
   const [sortField, setSortField] = useState<SortField>(SortField.VOLUME);
@@ -86,6 +126,12 @@ const App: React.FC = () => {
         if (!rating) return false;
       }
 
+      // Favorites Filter (Legacy support if needed, but we have a separate view now)
+      // Keeping it for "Show Favorites in Market View" if user wants
+      if (filters.showFavoritesOnly) {
+        if (!isFavorite(b.secid)) return false;
+      }
+
       return true;
     });
 
@@ -102,7 +148,7 @@ const App: React.FC = () => {
     });
 
     return result;
-  }, [rawBonds, filters, sortField, sortOrder]);
+  }, [rawBonds, filters, sortField, sortOrder, favorites]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -118,14 +164,48 @@ const App: React.FC = () => {
       
       {/* Navbar */}
       <nav className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
-              <div className="bg-emerald-500/20 p-2 rounded-lg">
-                <TrendingUp className="w-6 h-6 text-emerald-400" />
+            <div className="flex items-center gap-8">
+              <div className="flex items-center gap-2 cursor-pointer" onClick={() => setCurrentView('market')}>
+                <div className="bg-emerald-500/20 p-2 rounded-lg">
+                  <TrendingUp className="w-6 h-6 text-emerald-400" />
+                </div>
+                <span className="text-xl font-bold text-white tracking-tight">MOEX<span className="text-emerald-400">Bonds</span></span>
               </div>
-              <span className="text-xl font-bold text-white tracking-tight">MOEX<span className="text-emerald-400">Bonds</span></span>
+              
+              {/* Navigation Links */}
+              <div className="hidden md:flex items-center gap-1">
+                <button 
+                  onClick={() => setCurrentView('market')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                    currentView === 'market' 
+                      ? 'bg-slate-800 text-white' 
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                  }`}
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  Рынок
+                </button>
+                <button 
+                  onClick={() => setCurrentView('favorites')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                    currentView === 'favorites' 
+                      ? 'bg-slate-800 text-amber-400' 
+                      : 'text-slate-400 hover:text-amber-400 hover:bg-slate-800/50'
+                  }`}
+                >
+                  <Star className="w-4 h-4" />
+                  Избранное
+                  {favorites.length > 0 && (
+                    <span className="bg-amber-500/20 text-amber-400 text-[10px] px-1.5 py-0.5 rounded-full ml-1">
+                      {favorites.length}
+                    </span>
+                  )}
+                </button>
+              </div>
             </div>
+
             <div className="text-xs text-slate-500 hidden sm:block">
               Источник: ISS MOEX API (Public)
             </div>
@@ -133,8 +213,10 @@ const App: React.FC = () => {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="w-full px-4 sm:px-6 lg:px-8 py-8">
         
+        {currentView === 'market' ? (
+          <>
         {/* Stats Header */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 flex items-center justify-between">
@@ -169,13 +251,13 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
           
           {/* Main Content Area */}
-          <div className="xl:col-span-2 space-y-6">
+          <div className="xl:col-span-3 space-y-6">
             {/* Filters */}
             <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
-              <Filters filters={filters} setFilters={setFilters} />
+              <Filters filters={filters} setFilters={setFilters} onReset={resetFilters} />
               <YieldChart bonds={processedBonds} />
             </div>
 
@@ -203,7 +285,12 @@ const App: React.FC = () => {
                 bonds={processedBonds} 
                 sortField={sortField} 
                 sortOrder={sortOrder} 
-                onSort={handleSort} 
+                onSort={handleSort}
+                favorites={favorites.map(f => f.secid)}
+                onToggleFavorite={(secid) => {
+                  const bond = rawBonds.find(b => b.secid === secid);
+                  if (bond) toggleFavorite(bond);
+                }}
               />
             )}
           </div>
@@ -220,21 +307,21 @@ const App: React.FC = () => {
                       <span className="text-lg">💎</span>
                       <div>
                         <p className="text-sm font-bold text-emerald-400">Топ Выбор</p>
-                        <p className="text-xs text-slate-400">Листинг 1-2, Доход &gt; 20%, Цена &lt; 108%</p>
+                        <p className="text-xs text-slate-400">Листинг 1-2, Доход {'>'} 20%, Цена {'<'} 108%</p>
                       </div>
                    </div>
                    <div className="flex items-start gap-3 p-2 rounded hover:bg-slate-800/50 transition-colors">
                       <span className="text-lg">🛡️</span>
                       <div>
                         <p className="text-sm font-bold text-blue-400">Надежные</p>
-                        <p className="text-xs text-slate-400">Листинг 1-2, Доход &gt; 16%, Короткие</p>
+                        <p className="text-xs text-slate-400">Листинг 1-2, Доход {'>'} 16%, Короткие</p>
                       </div>
                    </div>
                     <div className="flex items-start gap-3 p-2 rounded hover:bg-slate-800/50 transition-colors">
                       <span className="text-lg">🔥</span>
                       <div>
                         <p className="text-sm font-bold text-orange-400">Высокая Доходность</p>
-                        <p className="text-xs text-slate-400">Доход &gt; 24%, Высокая ликвидность</p>
+                        <p className="text-xs text-slate-400">Доход {'>'} 24%, Высокая ликвидность</p>
                       </div>
                    </div>
                  </div>
@@ -243,6 +330,46 @@ const App: React.FC = () => {
           </div>
 
         </div>
+        </>
+        ) : (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                <Star className="w-8 h-8 text-amber-400 fill-amber-400" />
+                Избранные облигации
+              </h2>
+              <div className="text-slate-400 text-sm">
+                Сохранено: {favorites.length}
+              </div>
+            </div>
+
+            {favorites.length === 0 ? (
+              <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-12 text-center">
+                <Star className="w-16 h-16 text-slate-700 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-white mb-2">Список избранного пуст</h3>
+                <p className="text-slate-400 mb-6">Добавляйте интересные облигации, нажимая на звездочку в таблице.</p>
+                <button 
+                  onClick={() => setCurrentView('market')}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                >
+                  Перейти к рынку
+                </button>
+              </div>
+            ) : (
+              <BondTable 
+                bonds={favorites} 
+                sortField={sortField} 
+                sortOrder={sortOrder} 
+                onSort={handleSort}
+                favorites={favorites.map(f => f.secid)}
+                onToggleFavorite={(secid) => {
+                  const bond = favorites.find(b => b.secid === secid);
+                  if (bond) toggleFavorite(bond);
+                }}
+              />
+            )}
+          </div>
+        )}
       </main>
     </div>
   );

@@ -1,6 +1,5 @@
-import React from 'react';
 import { Bond, SortField, SortOrder } from '../types';
-import { ArrowUp, ArrowDown, ExternalLink, CalendarClock, Waves, Landmark } from 'lucide-react';
+import { ArrowUp, ArrowDown, ExternalLink, CalendarClock, Waves, Landmark, Star } from 'lucide-react';
 import { getBondRating } from '../App';
 
 interface BondTableProps {
@@ -8,9 +7,11 @@ interface BondTableProps {
   sortField: SortField;
   sortOrder: SortOrder;
   onSort: (field: SortField) => void;
+  favorites: string[];
+  onToggleFavorite: (secid: string) => void;
 }
 
-const BondTable: React.FC<BondTableProps> = ({ bonds, sortField, sortOrder, onSort }) => {
+const BondTable: React.FC<BondTableProps> = ({ bonds, sortField, sortOrder, onSort, favorites, onToggleFavorite }) => {
   
   const renderSortIcon = (field: SortField) => {
     if (sortField !== field) return <span className="w-4 h-4 ml-1 inline-block opacity-0"></span>;
@@ -52,6 +53,9 @@ const BondTable: React.FC<BondTableProps> = ({ bonds, sortField, sortOrder, onSo
       <table className="min-w-full divide-y divide-slate-700">
         <thead className="bg-slate-900/80">
           <tr>
+            <th className="px-4 py-3 text-center text-xs font-medium text-slate-400 uppercase tracking-wider w-10">
+              <Star className="w-4 h-4 mx-auto" />
+            </th>
             <th className="px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Тикер / Имя</th>
             <HeaderCell field={SortField.PRICE} label="Цена %" align="right" />
             <HeaderCell field={SortField.YIELD} label="Доходн. %" align="right" />
@@ -65,13 +69,23 @@ const BondTable: React.FC<BondTableProps> = ({ bonds, sortField, sortOrder, onSo
         <tbody className="divide-y divide-slate-700">
           {bonds.length === 0 ? (
             <tr>
-              <td colSpan={8} className="px-4 py-8 text-center text-slate-500">
+              <td colSpan={9} className="px-4 py-8 text-center text-slate-500">
                 Облигации не найдены под ваши фильтры.
               </td>
             </tr>
           ) : (
             bonds.map((bond) => (
               <tr key={bond.secid} className="hover:bg-slate-700/40 transition-colors group">
+                <td className="px-4 py-3 whitespace-nowrap text-center">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onToggleFavorite(bond.secid); }}
+                    className="text-slate-600 hover:text-amber-400 transition-colors focus:outline-none"
+                  >
+                    <Star
+                      className={`w-5 h-5 ${favorites.includes(bond.secid) ? 'fill-amber-400 text-amber-400' : ''}`}
+                    />
+                  </button>
+                </td>
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex flex-col">
                     <div className="flex items-center">
