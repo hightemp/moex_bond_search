@@ -12,3 +12,7 @@
 *   Tailwind CSS
 *   Recharts
 *   Google Generative AI SDK
+
+## Скриншоты
+
+![](screenshots/2025-11-22_14-48.png)
