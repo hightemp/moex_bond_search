@@ -17,3 +17,5 @@
 
 ![](screenshots/2025-11-22_14-48.png)
 ![](screenshots/2025-11-22_15-31.png)
+
+![](https://asdertasd.site/counter/moex_bond_search)
