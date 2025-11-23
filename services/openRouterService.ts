@@ -1,4 +1,5 @@
 import { Bond } from "../types";
+import { CBRData } from "./cbrService";
 
 export interface OpenRouterModel {
   id: string;
@@ -31,15 +32,23 @@ export const fetchModels = async (): Promise<OpenRouterModel[]> => {
 export const analyzeSingleBond = async (
   bond: Bond,
   apiKey: string,
-  modelId: string
+  modelId: string,
+  cbrData?: CBRData
 ): Promise<string> => {
   if (!apiKey) return "API Key missing.";
+
+  const cbrInfo = cbrData
+    ? `Текущая ключевая ставка ЦБ РФ: ${cbrData.keyRate}%. Официальная инфляция: ${cbrData.inflation}%.`
+    : "Данные ЦБ РФ недоступны, используй общие знания о высокой ставке (~21%).";
 
   const prompt = `
     Ты профессиональный финансовый аналитик, специализирующийся на рынке облигаций РФ (Мосбиржа).
     Отвечай строго на русском языке.
     
     Проанализируй данную облигацию и дай рекомендацию: СТОИТ ЛИ ЕЕ ПОКУПАТЬ СЕЙЧАС?
+
+    Контекст рынка:
+    ${cbrInfo}
 
     Данные облигации:
     - Тикер: ${bond.secid}
@@ -57,7 +66,7 @@ export const analyzeSingleBond = async (
     Твоя задача:
     1. Дай четкий вердикт: "Покупать", "Держать", "Продавать" или "Рискованно".
     2. Обоснуй решение, оценив соотношение риск/доходность.
-    3. Сравни доходность с текущей ключевой ставкой ЦБ РФ (предполагай ~21-23%).
+    3. Сравни доходность с текущей ключевой ставкой ЦБ РФ (${cbrData?.keyRate || 21}%).
     4. Укажи главные плюсы и минусы инструмента.
     5. Отформатируй ответ в Markdown.
   `;

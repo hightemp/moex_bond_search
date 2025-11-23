@@ -6,6 +6,7 @@ import Filters from './components/Filters';
 import YieldChart from './components/YieldChart';
 import AIAdvisor from './components/AIAdvisor';
 import BondAnalysisModal from './components/BondAnalysisModal';
+import CBRWidget from './components/CBRWidget';
 import { TrendingUp, Activity, AlertCircle, RefreshCw, Star, LayoutDashboard } from 'lucide-react';
 
 // Helper for bond ratings
@@ -222,7 +223,9 @@ const App: React.FC = () => {
         {currentView === 'market' ? (
           <>
         {/* Stats Header */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <CBRWidget />
+          
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 flex items-center justify-between">
             <div>
               <p className="text-slate-500 text-sm font-medium">Найдено облигаций</p>
@@ -234,8 +237,8 @@ const App: React.FC = () => {
             <div>
               <p className="text-slate-500 text-sm font-medium">Ср. Доходность (Выбрано)</p>
               <h3 className="text-2xl font-bold text-emerald-400 mt-1">
-                {processedBonds.length > 0 
-                  ? (processedBonds.reduce((acc, b) => acc + b.yield, 0) / processedBonds.length).toFixed(2) 
+                {processedBonds.length > 0
+                  ? (processedBonds.reduce((acc, b) => acc + b.yield, 0) / processedBonds.length).toFixed(2)
                   : 0}%
               </h3>
             </div>

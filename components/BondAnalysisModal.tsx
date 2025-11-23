@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Bond } from '../types';
 import { analyzeSingleBond } from '../services/openRouterService';
+import { getCBRData } from '../services/cbrService';
 import ReactMarkdown from 'react-markdown';
 import { X, Loader2, BrainCircuit } from 'lucide-react';
 
@@ -28,7 +29,10 @@ const BondAnalysisModal: React.FC<BondAnalysisModalProps> = ({ bond, onClose }) 
       setAnalysis(null);
       setError(null);
 
-      analyzeSingleBond(bond, apiKey, model)
+      // Get CBR data from local storage
+      const cbrData = getCBRData();
+      
+      analyzeSingleBond(bond, apiKey, model, cbrData)
         .then(setAnalysis)
         .catch(err => setError("Ошибка анализа: " + err.message))
         .finally(() => setLoading(false));
