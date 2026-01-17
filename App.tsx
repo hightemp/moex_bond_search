@@ -6,6 +6,7 @@ import Filters from './components/Filters';
 import YieldChart from './components/YieldChart';
 import AIAdvisor from './components/AIAdvisor';
 import BondAnalysisModal from './components/BondAnalysisModal';
+import BondDetailPage from './components/BondDetailPage';
 import CBRWidget from './components/CBRWidget';
 import { TrendingUp, Activity, AlertCircle, RefreshCw, Star, LayoutDashboard } from 'lucide-react';
 
@@ -50,10 +51,25 @@ const App: React.FC = () => {
   });
 
   // Navigation State
-  const [currentView, setCurrentView] = useState<'market' | 'favorites'>('market');
+  const [currentView, setCurrentView] = useState<'market' | 'favorites' | 'bond'>('market');
+  
+  // Selected Bond for Detail Page
+  const [selectedBond, setSelectedBond] = useState<Bond | null>(null);
   
   // Analysis Modal State
   const [selectedBondForAnalysis, setSelectedBondForAnalysis] = useState<Bond | null>(null);
+
+  // Navigate to bond detail page
+  const handleSelectBond = (bond: Bond) => {
+    setSelectedBond(bond);
+    setCurrentView('bond');
+  };
+
+  // Navigate back from bond detail page
+  const handleBackFromBondDetail = () => {
+    setSelectedBond(null);
+    setCurrentView('market');
+  };
 
   useEffect(() => {
     localStorage.setItem('favorite_bonds_full', JSON.stringify(favorites));
@@ -220,7 +236,14 @@ const App: React.FC = () => {
 
       <main className="w-full px-4 sm:px-6 lg:px-8 py-8">
         
-        {currentView === 'market' ? (
+        {currentView === 'bond' && selectedBond ? (
+          <BondDetailPage
+            bond={selectedBond}
+            onBack={handleBackFromBondDetail}
+            isFavorite={isFavorite(selectedBond.secid)}
+            onToggleFavorite={() => toggleFavorite(selectedBond)}
+          />
+        ) : currentView === 'market' ? (
           <>
         {/* Stats Header */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -299,6 +322,7 @@ const App: React.FC = () => {
                   if (bond) toggleFavorite(bond);
                 }}
                 onAnalyze={setSelectedBondForAnalysis}
+                onSelectBond={handleSelectBond}
               />
             )}
           </div>
@@ -375,6 +399,7 @@ const App: React.FC = () => {
                   if (bond) toggleFavorite(bond);
                 }}
                 onAnalyze={setSelectedBondForAnalysis}
+                onSelectBond={handleSelectBond}
               />
             )}
           </div>

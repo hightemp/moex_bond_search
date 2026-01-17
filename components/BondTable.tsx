@@ -10,9 +10,10 @@ interface BondTableProps {
   favorites: string[];
   onToggleFavorite: (secid: string) => void;
   onAnalyze?: (bond: Bond) => void;
+  onSelectBond?: (bond: Bond) => void;
 }
 
-const BondTable: React.FC<BondTableProps> = ({ bonds, sortField, sortOrder, onSort, favorites, onToggleFavorite, onAnalyze }) => {
+const BondTable: React.FC<BondTableProps> = ({ bonds, sortField, sortOrder, onSort, favorites, onToggleFavorite, onAnalyze, onSelectBond }) => {
   
   const renderSortIcon = (field: SortField) => {
     if (sortField !== field) return <span className="w-4 h-4 ml-1 inline-block opacity-0"></span>;
@@ -61,6 +62,7 @@ const BondTable: React.FC<BondTableProps> = ({ bonds, sortField, sortOrder, onSo
             <HeaderCell field={SortField.PRICE} label="Цена %" align="right" />
             <HeaderCell field={SortField.YIELD} label="Доходн. %" align="right" />
             <th className="px-4 py-3 text-right text-xs font-medium text-slate-400 uppercase tracking-wider">Купон %</th>
+            <th className="px-4 py-3 text-center text-xs font-medium text-slate-400 uppercase tracking-wider">Выпл./год</th>
             <th className="px-4 py-3 text-center text-xs font-medium text-slate-400 uppercase tracking-wider">Особ.</th>
             <HeaderCell field={SortField.MATURITY} label="Погашение" align="right" />
             <HeaderCell field={SortField.VOLUME} label="Объем (₽)" align="right" />
@@ -71,7 +73,7 @@ const BondTable: React.FC<BondTableProps> = ({ bonds, sortField, sortOrder, onSo
         <tbody className="divide-y divide-slate-700">
           {bonds.length === 0 ? (
             <tr>
-              <td colSpan={11} className="px-4 py-8 text-center text-slate-500">
+              <td colSpan={12} className="px-4 py-8 text-center text-slate-500">
                 Облигации не найдены под ваши фильтры.
               </td>
             </tr>
@@ -91,7 +93,16 @@ const BondTable: React.FC<BondTableProps> = ({ bonds, sortField, sortOrder, onSo
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex flex-col">
                     <div className="flex items-center">
-                       <span className="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors">{bond.secid}</span>
+                       {onSelectBond ? (
+                         <button
+                           onClick={() => onSelectBond(bond)}
+                           className="text-sm font-bold text-white hover:text-emerald-400 transition-colors underline decoration-dotted underline-offset-2 decoration-slate-600 hover:decoration-emerald-400"
+                         >
+                           {bond.secid}
+                         </button>
+                       ) : (
+                         <span className="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors">{bond.secid}</span>
+                       )}
                        {renderBadge(bond)}
                     </div>
                     <span className="text-xs text-slate-400 truncate max-w-[150px] sm:max-w-[200px]">{bond.shortname}</span>
@@ -109,6 +120,9 @@ const BondTable: React.FC<BondTableProps> = ({ bonds, sortField, sortOrder, onSo
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-right text-sm text-slate-300">
                   {bond.couponPercent.toFixed(2)}%
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-center text-sm text-slate-300">
+                  {bond.couponPeriod > 0 ? Math.round(365 / bond.couponPeriod) : '-'}
                 </td>
                 
                 {/* Features Column */}

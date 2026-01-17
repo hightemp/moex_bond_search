@@ -4,12 +4,19 @@ export interface Bond {
   price: number; // % от номинала
   yield: number; // Доходность
   couponPercent: number;
+  couponPeriod: number; // Длительность купона в днях
+  couponValue: number; // Сумма купона в рублях
+  accruedInt: number; // НКД
+  nextCoupon?: string | null; // Дата следующего купона
   maturityDate: string;
   offerDate?: string | null; // Дата оферты
   volume: number; // Объем в рублях
   duration: number; // Дней до погашения
   isin: string;
   listLevel: number;
+  faceValue: number; // Номинал
+  lotSize: number; // Размер лота
+  issueSize: number; // Объем выпуска
   isFloater: boolean; // Флоатер (эвристика)
   isAmortized: boolean; // Амортизация (эвристика)
 }

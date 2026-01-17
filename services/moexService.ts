@@ -37,9 +37,16 @@ export const fetchBonds = async (): Promise<Bond[]> => {
     const idxPrevYield = getColIndex(secCols, 'YIELDATPREVWAPRICE');
     const idxMatDate = getColIndex(secCols, 'MATDATE');
     const idxCoupon = getColIndex(secCols, 'COUPONPERCENT');
+    const idxCouponPeriod = getColIndex(secCols, 'COUPONPERIOD'); // Длительность купона в днях
+    const idxCouponValue = getColIndex(secCols, 'COUPONVALUE'); // Сумма купона
+    const idxAccruedInt = getColIndex(secCols, 'ACCRUEDINT'); // НКД
+    const idxNextCoupon = getColIndex(secCols, 'NEXTCOUPON'); // Дата следующего купона
     const idxIsin = getColIndex(secCols, 'ISIN');
     const idxListLevel = getColIndex(secCols, 'LISTLEVEL');
     const idxOfferDate = getColIndex(secCols, 'OFFERDATE'); // Дата оферты
+    const idxFaceValue = getColIndex(secCols, 'FACEVALUE'); // Номинал
+    const idxLotSize = getColIndex(secCols, 'LOTSIZE'); // Размер лота
+    const idxIssueSize = getColIndex(secCols, 'ISSUESIZE'); // Объем выпуска
 
     // 2. Parse Market Data (Real-time Data: Last Price, Current Yield, Volume)
     const mdCols = json.marketdata.columns;
@@ -103,12 +110,19 @@ export const fetchBonds = async (): Promise<Bond[]> => {
         price: typeof price === 'number' ? price : 0,
         yield: typeof yieldVal === 'number' ? yieldVal : 0,
         couponPercent: (row[idxCoupon] as number) || 0,
+        couponPeriod: (row[idxCouponPeriod] as number) || 0,
+        couponValue: (row[idxCouponValue] as number) || 0,
+        accruedInt: (row[idxAccruedInt] as number) || 0,
+        nextCoupon: idxNextCoupon !== -1 ? (row[idxNextCoupon] as string) : null,
         maturityDate: matDateVal,
         offerDate: offerDateVal,
         volume: volume,
         duration: durationDays > 0 ? durationDays : 0,
         isin: row[idxIsin] as string,
         listLevel: (row[idxListLevel] as number) || 3,
+        faceValue: (row[idxFaceValue] as number) || 1000,
+        lotSize: (row[idxLotSize] as number) || 1,
+        issueSize: (row[idxIssueSize] as number) || 0,
         isFloater,
         isAmortized
       };
