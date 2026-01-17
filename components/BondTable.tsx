@@ -63,6 +63,7 @@ const BondTable: React.FC<BondTableProps> = ({ bonds, sortField, sortOrder, onSo
             <HeaderCell field={SortField.YIELD} label="Доходн. %" align="right" />
             <HeaderCell field={SortField.COUPON} label="Купон %" align="right" />
             <HeaderCell field={SortField.COUPON_FREQUENCY} label="Выпл./год" align="center" />
+            <HeaderCell field={SortField.LIST_LEVEL} label="Лист." align="center" />
             <th className="px-4 py-3 text-center text-xs font-medium text-slate-400 uppercase tracking-wider">Особ.</th>
             <HeaderCell field={SortField.MATURITY} label="Погашение" align="right" />
             <HeaderCell field={SortField.VOLUME} label="Объем (₽)" align="right" />
@@ -73,7 +74,7 @@ const BondTable: React.FC<BondTableProps> = ({ bonds, sortField, sortOrder, onSo
         <tbody className="divide-y divide-slate-700">
           {bonds.length === 0 ? (
             <tr>
-              <td colSpan={12} className="px-4 py-8 text-center text-slate-500">
+              <td colSpan={13} className="px-4 py-8 text-center text-slate-500">
                 Облигации не найдены под ваши фильтры.
               </td>
             </tr>
@@ -123,6 +124,15 @@ const BondTable: React.FC<BondTableProps> = ({ bonds, sortField, sortOrder, onSo
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-center text-sm text-slate-300">
                   {bond.couponPeriod > 0 ? Math.round(365 / bond.couponPeriod) : '-'}
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-center">
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                    bond.listLevel === 1 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                    bond.listLevel === 2 ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                    'bg-orange-500/20 text-orange-400 border border-orange-500/30'
+                  }`}>
+                    {bond.listLevel}
+                  </span>
                 </td>
                 
                 {/* Features Column */}

@@ -27,7 +27,8 @@ export enum SortField {
   VOLUME = 'volume',
   PRICE = 'price',
   COUPON = 'couponPercent',
-  COUPON_FREQUENCY = 'couponFrequency'
+  COUPON_FREQUENCY = 'couponFrequency',
+  LIST_LEVEL = 'listLevel'
 }
 
 export enum SortOrder {
