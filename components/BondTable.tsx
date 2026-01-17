@@ -64,6 +64,7 @@ const BondTable: React.FC<BondTableProps> = ({ bonds, sortField, sortOrder, onSo
             <HeaderCell field={SortField.COUPON} label="Купон %" align="right" />
             <HeaderCell field={SortField.COUPON_FREQUENCY} label="Выпл./год" align="center" />
             <HeaderCell field={SortField.LIST_LEVEL} label="Лист." align="center" />
+            <th className="px-4 py-3 text-center text-xs font-medium text-slate-400 uppercase tracking-wider">Валюта</th>
             <th className="px-4 py-3 text-center text-xs font-medium text-slate-400 uppercase tracking-wider">Особ.</th>
             <HeaderCell field={SortField.MATURITY} label="Погашение" align="right" />
             <HeaderCell field={SortField.VOLUME} label="Объем (₽)" align="right" />
@@ -74,7 +75,7 @@ const BondTable: React.FC<BondTableProps> = ({ bonds, sortField, sortOrder, onSo
         <tbody className="divide-y divide-slate-700">
           {bonds.length === 0 ? (
             <tr>
-              <td colSpan={13} className="px-4 py-8 text-center text-slate-500">
+              <td colSpan={14} className="px-4 py-8 text-center text-slate-500">
                 Облигации не найдены под ваши фильтры.
               </td>
             </tr>
@@ -132,6 +133,17 @@ const BondTable: React.FC<BondTableProps> = ({ bonds, sortField, sortOrder, onSo
                     'bg-orange-500/20 text-orange-400 border border-orange-500/30'
                   }`}>
                     {bond.listLevel}
+                  </span>
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-center">
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                    (bond.faceUnit || bond.currencyId || 'RUB') === 'RUB' ? 'bg-slate-700 text-slate-300' :
+                    (bond.faceUnit || bond.currencyId) === 'USD' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                    (bond.faceUnit || bond.currencyId) === 'EUR' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                    (bond.faceUnit || bond.currencyId) === 'CNY' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                    'bg-slate-700 text-slate-300'
+                  }`}>
+                    {bond.faceUnit || bond.currencyId || 'RUB'}
                   </span>
                 </td>
                 

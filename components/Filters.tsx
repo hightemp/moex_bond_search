@@ -60,7 +60,7 @@ const Filters: React.FC<FiltersProps> = ({ filters, setFilters, onReset }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4">
         {/* Search */}
         <div className="lg:col-span-2 relative group">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-emerald-400 transition-colors" />
@@ -123,6 +123,22 @@ const Filters: React.FC<FiltersProps> = ({ filters, setFilters, onReset }) => {
              <option value={2}>2 (полугодовой)</option>
              <option value={4}>4 (квартальный)</option>
              <option value={12}>12 (ежемесячный)</option>
+           </select>
+        </div>
+
+        {/* Currency */}
+        <div className="relative">
+           <label className="absolute -top-2 left-2 bg-slate-900 px-1 text-[10px] text-slate-400 font-medium">Валюта</label>
+           <select
+             value={filters.currency}
+             onChange={(e) => handleChange('currency', e.target.value)}
+             className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:ring-1 focus:ring-emerald-500 outline-none appearance-none"
+           >
+             <option value="all">Любая</option>
+             <option value="RUB">RUB (Рубли)</option>
+             <option value="USD">USD (Доллары)</option>
+             <option value="EUR">EUR (Евро)</option>
+             <option value="CNY">CNY (Юани)</option>
            </select>
         </div>
 

@@ -94,6 +94,7 @@ export interface FilterState {
   searchText: string;
   listLevel: 'all' | 1 | 2 | 3;
   couponFrequency: 'all' | 1 | 2 | 4 | 12; // Выплат в год: все, 1, 2, 4, 12
+  currency: 'all' | 'RUB' | 'USD' | 'EUR' | 'CNY'; // Валюта
   showBestBuysOnly: boolean;
   showFavoritesOnly: boolean;
 }

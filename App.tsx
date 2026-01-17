@@ -41,6 +41,7 @@ const App: React.FC = () => {
     searchText: '',
     listLevel: 'all',
     couponFrequency: 'all',
+    currency: 'all',
     showBestBuysOnly: false,
     showFavoritesOnly: false
   });
@@ -98,6 +99,7 @@ const App: React.FC = () => {
       searchText: '',
       listLevel: 'all',
       couponFrequency: 'all',
+      currency: 'all',
       showBestBuysOnly: false,
       showFavoritesOnly: false
     });
@@ -140,6 +142,12 @@ const App: React.FC = () => {
       if (filters.couponFrequency !== 'all') {
         const bondFrequency = b.couponPeriod > 0 ? Math.round(365 / b.couponPeriod) : 0;
         if (bondFrequency !== filters.couponFrequency) return false;
+      }
+
+      // Currency Filter
+      if (filters.currency !== 'all') {
+        const bondCurrency = b.faceUnit || b.currencyId || 'RUB';
+        if (bondCurrency !== filters.currency) return false;
       }
 
       // Text Search
