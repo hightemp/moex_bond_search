@@ -1,24 +1,74 @@
 export interface Bond {
+  // Основные идентификаторы
   secid: string;
   shortname: string;
+  secname: string; // Полное название
+  isin: string;
+  regnumber: string; // Регистрационный номер
+  
+  // Цена и доходность
   price: number; // % от номинала
-  yield: number; // Доходность
+  yield: number; // Доходность к погашению
+  yieldToOffer?: number | null; // Доходность к оферте
+  effectiveYield?: number | null; // Эффективная доходность
+  
+  // Купонные данные
   couponPercent: number;
   couponPeriod: number; // Длительность купона в днях
   couponValue: number; // Сумма купона в рублях
   accruedInt: number; // НКД
   nextCoupon?: string | null; // Дата следующего купона
+  
+  // Даты
   maturityDate: string;
   offerDate?: string | null; // Дата оферты
+  buybackDate?: string | null; // Дата выкупа
+  settleDate?: string | null; // Дата расчетов
+  
+  // Объемы и торговля
   volume: number; // Объем в рублях
-  duration: number; // Дней до погашения
-  isin: string;
-  listLevel: number;
+  numTrades?: number | null; // Количество сделок
+  duration: number; // Дней до погашения (рассчитанная дюрация)
+  durationMoex?: number | null; // Дюрация от MOEX
+  
+  // Номинал и лоты
   faceValue: number; // Номинал
+  faceValueOnSettleDate?: number | null; // Номинал на дату расчетов
   lotSize: number; // Размер лота
+  lotValue?: number | null; // Номинальная стоимость лота
   issueSize: number; // Объем выпуска
-  isFloater: boolean; // Флоатер (эвристика)
-  isAmortized: boolean; // Амортизация (эвристика)
+  issueSizePlaced?: number | null; // Объем в обращении
+  
+  // Уровень и валюта
+  listLevel: number;
+  currencyId?: string | null; // Валюта расчетов
+  faceUnit?: string | null; // Валюта номинала
+  
+  // Опционы
+  buybackPrice?: number | null; // Цена оферты
+  callOptionDate?: string | null; // Дата колл-опциона
+  putOptionDate?: string | null; // Дата пут-опциона
+  
+  // Спреды
+  zSpread?: number | null; // Z-спред
+  gSpread?: number | null; // G-спред
+  
+  // Тип облигации
+  bondType?: string | null; // Вид облигации
+  bondSubType?: string | null; // Подвид облигации
+  
+  // Рыночные данные
+  bid?: number | null; // Лучшая цена покупки
+  offer?: number | null; // Лучшая цена продажи
+  spread?: number | null; // Спред bid/offer
+  open?: number | null; // Цена открытия
+  high?: number | null; // Максимум дня
+  low?: number | null; // Минимум дня
+  waprice?: number | null; // Средневзвешенная цена
+  
+  // Эвристики
+  isFloater: boolean; // Флоатер (плавающий купон)
+  isAmortized: boolean; // Амортизация
 }
 
 export enum SortField {
