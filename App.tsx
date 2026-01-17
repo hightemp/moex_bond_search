@@ -40,6 +40,7 @@ const App: React.FC = () => {
     maxDurationDays: 2000,
     searchText: '',
     listLevel: 'all',
+    couponFrequency: 'all',
     showBestBuysOnly: false,
     showFavoritesOnly: false
   });
@@ -96,6 +97,7 @@ const App: React.FC = () => {
       maxDurationDays: 2000,
       searchText: '',
       listLevel: 'all',
+      couponFrequency: 'all',
       showBestBuysOnly: false,
       showFavoritesOnly: false
     });
@@ -134,6 +136,12 @@ const App: React.FC = () => {
       // List Level Filter
       if (filters.listLevel !== 'all' && b.listLevel !== filters.listLevel) return false;
 
+      // Coupon Frequency Filter
+      if (filters.couponFrequency !== 'all') {
+        const bondFrequency = b.couponPeriod > 0 ? Math.round(365 / b.couponPeriod) : 0;
+        if (bondFrequency !== filters.couponFrequency) return false;
+      }
+
       // Text Search
       if (filters.searchText) {
         const term = filters.searchText.toLowerCase();
@@ -157,8 +165,17 @@ const App: React.FC = () => {
     });
 
     result.sort((a, b) => {
-      let valA = a[sortField];
-      let valB = b[sortField];
+      let valA: number | string;
+      let valB: number | string;
+
+      // Handle special case for couponFrequency (calculated field)
+      if (sortField === SortField.COUPON_FREQUENCY) {
+        valA = a.couponPeriod > 0 ? Math.round(365 / a.couponPeriod) : 0;
+        valB = b.couponPeriod > 0 ? Math.round(365 / b.couponPeriod) : 0;
+      } else {
+        valA = a[sortField as keyof Bond] as number | string;
+        valB = b[sortField as keyof Bond] as number | string;
+      }
 
       // Handle strings if needed, though mostly numbers
       if (typeof valA === 'string' && typeof valB === 'string') {

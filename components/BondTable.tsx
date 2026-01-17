@@ -61,8 +61,8 @@ const BondTable: React.FC<BondTableProps> = ({ bonds, sortField, sortOrder, onSo
             <th className="px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Тикер / Имя</th>
             <HeaderCell field={SortField.PRICE} label="Цена %" align="right" />
             <HeaderCell field={SortField.YIELD} label="Доходн. %" align="right" />
-            <th className="px-4 py-3 text-right text-xs font-medium text-slate-400 uppercase tracking-wider">Купон %</th>
-            <th className="px-4 py-3 text-center text-xs font-medium text-slate-400 uppercase tracking-wider">Выпл./год</th>
+            <HeaderCell field={SortField.COUPON} label="Купон %" align="right" />
+            <HeaderCell field={SortField.COUPON_FREQUENCY} label="Выпл./год" align="center" />
             <th className="px-4 py-3 text-center text-xs font-medium text-slate-400 uppercase tracking-wider">Особ.</th>
             <HeaderCell field={SortField.MATURITY} label="Погашение" align="right" />
             <HeaderCell field={SortField.VOLUME} label="Объем (₽)" align="right" />

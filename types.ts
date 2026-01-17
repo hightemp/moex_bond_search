@@ -25,7 +25,9 @@ export enum SortField {
   YIELD = 'yield',
   MATURITY = 'maturity',
   VOLUME = 'volume',
-  PRICE = 'price'
+  PRICE = 'price',
+  COUPON = 'couponPercent',
+  COUPON_FREQUENCY = 'couponFrequency'
 }
 
 export enum SortOrder {
@@ -40,6 +42,7 @@ export interface FilterState {
   maxDurationDays: number;
   searchText: string;
   listLevel: 'all' | 1 | 2 | 3;
+  couponFrequency: 'all' | 1 | 2 | 4 | 12; // Выплат в год: все, 1, 2, 4, 12
   showBestBuysOnly: boolean;
   showFavoritesOnly: boolean;
 }
