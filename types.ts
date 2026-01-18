@@ -95,8 +95,23 @@ export interface FilterState {
   listLevel: 'all' | 1 | 2 | 3;
   couponFrequency: 'all' | 1 | 2 | 4 | 12; // Выплат в год: все, 1, 2, 4, 12
   currency: 'all' | 'RUB' | 'USD' | 'EUR' | 'CNY'; // Валюта
+  bondType: 'all' | 'corporate' | 'ofz' | 'municipal' | 'vdo'; // Тип облигации
+  floaterFilter: 'all' | 'only' | 'exclude'; // Флоатер
+  amortizationFilter: 'all' | 'only' | 'exclude'; // Амортизация
+  hasOffer: 'all' | 'yes' | 'no'; // Наличие оферты
+  offerWithinDays: number | null; // Оферта в ближайшие N дней (null = не фильтровать)
+  minAccruedInt: number | null; // Мин. НКД
+  maxAccruedInt: number | null; // Макс. НКД
   showBestBuysOnly: boolean;
   showFavoritesOnly: boolean;
+}
+
+// Пресет фильтров
+export interface FilterPreset {
+  id: string;
+  name: string;
+  filters: FilterState;
+  createdAt: number;
 }
 
 // MOEX API Raw Response Types

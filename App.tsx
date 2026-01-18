@@ -32,8 +32,8 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Filter State
-  const [filters, setFilters] = useState<FilterState>({
+  // Default filter state
+  const defaultFilters: FilterState = {
     minYield: 10,
     maxPrice: 105,
     minVolume: 0,
@@ -42,9 +42,19 @@ const App: React.FC = () => {
     listLevel: 'all',
     couponFrequency: 'all',
     currency: 'all',
+    bondType: 'all',
+    floaterFilter: 'all',
+    amortizationFilter: 'all',
+    hasOffer: 'all',
+    offerWithinDays: null,
+    minAccruedInt: null,
+    maxAccruedInt: null,
     showBestBuysOnly: false,
     showFavoritesOnly: false
-  });
+  };
+
+  // Filter State
+  const [filters, setFilters] = useState<FilterState>(defaultFilters);
 
   // Favorites State (Full Bond Objects)
   const [favorites, setFavorites] = useState<Bond[]>(() => {
@@ -91,18 +101,7 @@ const App: React.FC = () => {
   const isFavorite = (secid: string) => favorites.some(b => b.secid === secid);
 
   const resetFilters = () => {
-    setFilters({
-      minYield: 10,
-      maxPrice: 105,
-      minVolume: 0,
-      maxDurationDays: 2000,
-      searchText: '',
-      listLevel: 'all',
-      couponFrequency: 'all',
-      currency: 'all',
-      showBestBuysOnly: false,
-      showFavoritesOnly: false
-    });
+    setFilters(defaultFilters);
   };
 
   // Sort State
@@ -150,10 +149,70 @@ const App: React.FC = () => {
         if (bondCurrency !== filters.currency) return false;
       }
 
-      // Text Search
+      // Bond Type Filter
+      if (filters.bondType !== 'all') {
+        const bondTypeStr = (b.bondType || '').toLowerCase();
+        const bondSubTypeStr = (b.bondSubType || '').toLowerCase();
+        const shortNameLower = b.shortname.toLowerCase();
+        const secidLower = b.secid.toLowerCase();
+        
+        switch (filters.bondType) {
+          case 'ofz':
+            // ОФЗ - государственные облигации
+            if (!shortNameLower.includes('офз') && !secidLower.startsWith('su')) return false;
+            break;
+          case 'municipal':
+            // Муниципальные облигации
+            if (!bondTypeStr.includes('муницип') && !bondSubTypeStr.includes('муницип') && 
+                !shortNameLower.includes('муницип') && !shortNameLower.includes('субъект')) return false;
+            break;
+          case 'vdo':
+            // ВДО (высокодоходные) - обычно листинг 3 или доходность > 25%
+            if (b.listLevel < 3 && b.yield < 25) return false;
+            break;
+          case 'corporate':
+            // Корпоративные - не ОФЗ и не муниципальные
+            if (shortNameLower.includes('офз') || secidLower.startsWith('su') ||
+                bondTypeStr.includes('муницип') || bondSubTypeStr.includes('муницип')) return false;
+            break;
+        }
+      }
+
+      // Floater Filter
+      if (filters.floaterFilter === 'only' && !b.isFloater) return false;
+      if (filters.floaterFilter === 'exclude' && b.isFloater) return false;
+
+      // Amortization Filter
+      if (filters.amortizationFilter === 'only' && !b.isAmortized) return false;
+      if (filters.amortizationFilter === 'exclude' && b.isAmortized) return false;
+
+      // Offer Filter
+      if (filters.hasOffer === 'yes' && !b.offerDate) return false;
+      if (filters.hasOffer === 'no' && b.offerDate) return false;
+
+      // Offer within N days
+      if (filters.offerWithinDays !== null && filters.offerWithinDays > 0) {
+        if (!b.offerDate) return false;
+        const offerDate = new Date(b.offerDate);
+        const today = new Date();
+        const diffDays = Math.ceil((offerDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        if (diffDays < 0 || diffDays > filters.offerWithinDays) return false;
+      }
+
+      // Accrued Interest Filter (НКД)
+      if (filters.minAccruedInt !== null && b.accruedInt < filters.minAccruedInt) return false;
+      if (filters.maxAccruedInt !== null && b.accruedInt > filters.maxAccruedInt) return false;
+
+      // Text Search (расширенный - ISIN, рег. номер, эмитент)
       if (filters.searchText) {
         const term = filters.searchText.toLowerCase();
-        return b.shortname.toLowerCase().includes(term) || b.secid.toLowerCase().includes(term);
+        const matchShortname = b.shortname.toLowerCase().includes(term);
+        const matchSecid = b.secid.toLowerCase().includes(term);
+        const matchSecname = b.secname.toLowerCase().includes(term);
+        const matchIsin = b.isin.toLowerCase().includes(term);
+        const matchRegnumber = b.regnumber.toLowerCase().includes(term);
+        
+        if (!matchShortname && !matchSecid && !matchSecname && !matchIsin && !matchRegnumber) return false;
       }
 
       // Smart Filter (Best Buys)
