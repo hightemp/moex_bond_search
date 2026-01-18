@@ -316,6 +316,12 @@ const BondDetailPage: React.FC<BondDetailPageProps> = ({ bond, onBack, isFavorit
                       <span className="text-white">{bond.bondSubType}</span>
                     </div>
                   )}
+                  {bond.issuerId && (
+                    <div className="flex justify-between items-center py-2 border-b border-slate-800">
+                      <span className="text-slate-400">ИНН эмитента</span>
+                      <span className="text-white font-mono">{bond.issuerId}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

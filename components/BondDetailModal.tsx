@@ -316,7 +316,7 @@ const BondDetailModal: React.FC<BondDetailModalProps> = ({ bond, onClose, isFavo
                         <span className="text-white font-mono text-xs">{bond.regnumber}</span>
                       </div>
                     )}
-                    <div className="flex justify-between items-center py-1.5">
+                    <div className="flex justify-between items-center py-1.5 border-b border-slate-800">
                       <span className="text-slate-400 text-sm">Листинг</span>
                       <span className={`px-2 py-0.5 rounded text-xs font-medium ${
                         bond.listLevel === 1 ? 'bg-emerald-500/20 text-emerald-400' :
@@ -326,6 +326,12 @@ const BondDetailModal: React.FC<BondDetailModalProps> = ({ bond, onClose, isFavo
                         {bond.listLevel} уровень
                       </span>
                     </div>
+                    {bond.issuerId && (
+                      <div className="flex justify-between items-center py-1.5">
+                        <span className="text-slate-400 text-sm">ИНН эмитента</span>
+                        <span className="text-white font-mono text-sm">{bond.issuerId}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 

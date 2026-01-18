@@ -57,6 +57,9 @@ export interface Bond {
   bondType?: string | null; // Вид облигации
   bondSubType?: string | null; // Подвид облигации
   
+  // Эмитент
+  issuerId?: string | null; // ИНН эмитента
+  
   // Рыночные данные
   bid?: number | null; // Лучшая цена покупки
   offer?: number | null; // Лучшая цена продажи

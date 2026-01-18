@@ -61,6 +61,7 @@ export const fetchBonds = async (): Promise<Bond[]> => {
     const idxPutOptionDate = getColIndex(secCols, 'PUTOPTIONDATE'); // Дата пут-опциона
     const idxBondType = getColIndex(secCols, 'BONDTYPE'); // Вид облигации
     const idxBondSubType = getColIndex(secCols, 'BONDSUBTYPE'); // Подвид облигации
+    const idxIssuerId = getColIndex(secCols, 'ISSUERID'); // ИНН эмитента
 
     // 2. Parse Market Data (Real-time Data: Last Price, Current Yield, Volume)
     const mdCols = json.marketdata.columns;
@@ -216,6 +217,9 @@ export const fetchBonds = async (): Promise<Bond[]> => {
         // Тип облигации
         bondType: idxBondType !== -1 ? (row[idxBondType] as string) : null,
         bondSubType: idxBondSubType !== -1 ? (row[idxBondSubType] as string) : null,
+        
+        // Эмитент
+        issuerId: idxIssuerId !== -1 ? (row[idxIssuerId] as string) : null,
         
         // Рыночные данные
         bid: md?.bid || null,
