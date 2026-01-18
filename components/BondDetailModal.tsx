@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import { Bond } from '../types';
 import { analyzeSingleBond, fetchModels, OpenRouterModel } from '../services/openRouterService';
 import { getCBRData } from '../services/cbrService';
+import { fetchEmitterInfo, EmitterInfo } from '../services/moexService';
 import { 
   X, 
   Star, 
@@ -26,7 +27,8 @@ import {
   BarChart3,
   Coins,
   FileText,
-  ArrowUpDown
+  ArrowUpDown,
+  Building2
 } from 'lucide-react';
 
 interface BondDetailModalProps {
@@ -45,6 +47,10 @@ const BondDetailModal: React.FC<BondDetailModalProps> = ({ bond, onClose, isFavo
   const [models, setModels] = useState<OpenRouterModel[]>([]);
   const [selectedModel, setSelectedModel] = useState<string>('google/gemini-2.0-flash-lite-preview-02-05:free');
   const [showSettings, setShowSettings] = useState(false);
+  
+  // Emitter info state
+  const [emitterInfo, setEmitterInfo] = useState<EmitterInfo | null>(null);
+  const [emitterLoading, setEmitterLoading] = useState(false);
 
   useEffect(() => {
     const savedKey = localStorage.getItem('openrouter_api_key');
@@ -65,10 +71,22 @@ const BondDetailModal: React.FC<BondDetailModalProps> = ({ bond, onClose, isFavo
     });
   }, []);
 
-  // Reset analysis when bond changes
+  // Reset analysis and load emitter info when bond changes
   useEffect(() => {
     setAnalysis(null);
     setQuery('');
+    setEmitterInfo(null);
+    
+    if (bond?.secid) {
+      setEmitterLoading(true);
+      fetchEmitterInfo(bond.secid)
+        .then(info => {
+          setEmitterInfo(info);
+        })
+        .finally(() => {
+          setEmitterLoading(false);
+        });
+    }
   }, [bond?.secid]);
 
   // Handle escape key
@@ -424,6 +442,67 @@ const BondDetailModal: React.FC<BondDetailModalProps> = ({ bond, onClose, isFavo
                       </div>
                     )}
                   </div>
+                </div>
+              </div>
+
+              {/* Emitter Info */}
+              <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+                <div className="px-4 py-3 border-b border-slate-800 bg-slate-900/50">
+                  <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-slate-400" />
+                    Эмитент
+                  </h2>
+                </div>
+                <div className="p-4">
+                  {emitterLoading ? (
+                    <div className="flex items-center justify-center py-4 gap-2">
+                      <Loader2 className="w-4 h-4 text-slate-500 animate-spin" />
+                      <span className="text-slate-500 text-sm">Загрузка данных эмитента...</span>
+                    </div>
+                  ) : emitterInfo ? (
+                    <div className="space-y-2">
+                      {emitterInfo.emitentTitle && (
+                        <div className="flex justify-between items-start py-1.5 border-b border-slate-800">
+                          <span className="text-slate-400 text-sm">Название</span>
+                          <span className="text-white text-sm text-right max-w-[250px]">{emitterInfo.emitentTitle}</span>
+                        </div>
+                      )}
+                      {emitterInfo.emitentInn && (
+                        <div className="flex justify-between items-center py-1.5 border-b border-slate-800">
+                          <span className="text-slate-400 text-sm">ИНН</span>
+                          <span className="text-white font-mono text-sm">{emitterInfo.emitentInn}</span>
+                        </div>
+                      )}
+                      {emitterInfo.emitentOkpo && (
+                        <div className="flex justify-between items-center py-1.5 border-b border-slate-800">
+                          <span className="text-slate-400 text-sm">ОКПО</span>
+                          <span className="text-white font-mono text-sm">{emitterInfo.emitentOkpo}</span>
+                        </div>
+                      )}
+                      {emitterInfo.emitentId && (
+                        <div className="flex justify-between items-center py-1.5 border-b border-slate-800">
+                          <span className="text-slate-400 text-sm">ID эмитента</span>
+                          <span className="text-white font-mono text-sm">{emitterInfo.emitentId}</span>
+                        </div>
+                      )}
+                      {emitterInfo.securityType && (
+                        <div className="flex justify-between items-center py-1.5 border-b border-slate-800">
+                          <span className="text-slate-400 text-sm">Тип бумаги</span>
+                          <span className="text-white text-sm">{emitterInfo.securityType}</span>
+                        </div>
+                      )}
+                      {emitterInfo.primaryBoardId && (
+                        <div className="flex justify-between items-center py-1.5">
+                          <span className="text-slate-400 text-sm">Режим торгов</span>
+                          <span className="text-white font-mono text-sm">{emitterInfo.primaryBoardId}</span>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-slate-500 text-sm text-center py-4">
+                      Данные эмитента недоступны
+                    </div>
+                  )}
                 </div>
               </div>
 

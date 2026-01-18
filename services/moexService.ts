@@ -246,3 +246,112 @@ export const fetchBonds = async (): Promise<Bond[]> => {
     throw error;
   }
 };
+
+// Emitter (issuer) information
+export interface EmitterInfo {
+  emitentId: number | null;
+  emitentTitle: string | null;
+  emitentInn: string | null;
+  emitentOkpo: string | null;
+  securityType: string | null;
+  securityGroup: string | null;
+  primaryBoardId: string | null;
+}
+
+// Fetch emitter info by SECID or ISIN
+export const fetchEmitterInfo = async (secidOrIsin: string): Promise<EmitterInfo | null> => {
+  const baseUrl = 'https://iss.moex.com/iss/securities.json';
+  const params = new URLSearchParams({
+    q: secidOrIsin,
+    engine: 'stock',
+    market: 'bonds',
+    'group_by': 'group',
+    'group_by_filter': 'stock_bonds',
+    'is_trading': '1',
+    limit: '20',
+    start: '0',
+    'iss.only': 'securities',
+    'iss.meta': 'off',
+    'iss.json': 'compact',
+    'securities.columns': 'secid,shortname,isin,emitent_id,emitent_title,emitent_inn,emitent_okpo,type,group,primary_boardid'
+  });
+
+  const url = `${baseUrl}?${params.toString()}`;
+
+  try {
+    let json: any;
+    
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Direct fetch failed');
+      json = await response.json();
+    } catch (directError) {
+      console.warn("Direct MOEX emitter fetch failed (likely CORS), switching to proxy...");
+      const response = await fetch(`${PROXY_URL}${encodeURIComponent(url)}`);
+      if (!response.ok) {
+        throw new Error(`MOEX API Error via Proxy: ${response.statusText}`);
+      }
+      json = await response.json();
+    }
+
+    // Parse compact JSON format
+    const securities = json.securities;
+    if (!securities || !securities.columns || !securities.data || securities.data.length === 0) {
+      return null;
+    }
+
+    const cols = securities.columns as string[];
+    const rows = securities.data as (string | number | null)[][];
+
+    // Get column indices
+    const getIdx = (name: string) => cols.indexOf(name);
+    const idxSecid = getIdx('secid');
+    const idxIsin = getIdx('isin');
+    const idxEmitentId = getIdx('emitent_id');
+    const idxEmitentTitle = getIdx('emitent_title');
+    const idxEmitentInn = getIdx('emitent_inn');
+    const idxEmitentOkpo = getIdx('emitent_okpo');
+    const idxType = getIdx('type');
+    const idxGroup = getIdx('group');
+    const idxPrimaryBoardId = getIdx('primary_boardid');
+
+    // Find the exact match (search returns similar results, so we need to match exactly)
+    const searchTerm = secidOrIsin.toUpperCase();
+    const matchedRow = rows.find(row => {
+      const secid = (row[idxSecid] as string || '').toUpperCase();
+      const isin = (row[idxIsin] as string || '').toUpperCase();
+      return secid === searchTerm || isin === searchTerm;
+    });
+
+    if (!matchedRow) {
+      // If no exact match, return the first result (best guess)
+      if (rows.length > 0) {
+        const row = rows[0];
+        return {
+          emitentId: row[idxEmitentId] as number | null,
+          emitentTitle: row[idxEmitentTitle] as string | null,
+          emitentInn: row[idxEmitentInn] as string | null,
+          emitentOkpo: row[idxEmitentOkpo] as string | null,
+          securityType: row[idxType] as string | null,
+          securityGroup: row[idxGroup] as string | null,
+          primaryBoardId: row[idxPrimaryBoardId] as string | null,
+        };
+      }
+      return null;
+    }
+
+    return {
+      emitentId: matchedRow[idxEmitentId] as number | null,
+      emitentTitle: matchedRow[idxEmitentTitle] as string | null,
+      emitentInn: matchedRow[idxEmitentInn] as string | null,
+      emitentOkpo: matchedRow[idxEmitentOkpo] as string | null,
+      securityType: matchedRow[idxType] as string | null,
+      securityGroup: matchedRow[idxGroup] as string | null,
+      primaryBoardId: matchedRow[idxPrimaryBoardId] as string | null,
+    };
+
+  } catch (error) {
+    console.error("Failed to fetch emitter info", error);
+    return null;
+  }
+};
